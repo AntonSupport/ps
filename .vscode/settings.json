@@ -1,0 +1,7 @@
+{
+    "terminal.integrated.shell.windows": "C:\\Program Files\\PowerShell\\6\\pwsh.exe",
+    "powershell.scriptAnalysis.enable": true,
+    "powershell.startAutomatically": true,
+    "powershell.enableProfileLoading": true,
+    "editor.formatOnType": true
+}
