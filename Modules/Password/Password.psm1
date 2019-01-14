@@ -110,7 +110,7 @@ New-Password -Copy
     [char[]]$lowletters = "qwertyuiopasdfghjklzxcvbnm"
     [char[]]$upletters  = "QWERTYUIOPASDFGHJKLZXCVBNM"
     [char[]]$ints       = "1234567890"
-    [char[]]$specSmbls  = '!@#$%^*()_+=-"?<>,.'
+    [char[]]$specSmbls  = '!@#$%^*()_+=-<>'
 
     [char[]]$pass   = Get-Random -InputObject $lowletters -Count $(Get-Random -Minimum 4 -Maximum 6)
             $pass  += Get-Random -InputObject $upletters -Count $(Get-Random -Minimum 2 -Maximum 4)
