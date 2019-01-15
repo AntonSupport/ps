@@ -41,7 +41,9 @@ Only examines the last 1000 lines of the event log
 .EXAMPLE
 get-LastOn -computername server1| Sort-Object time -Descending |
 Sort-Object id -unique | format-table -AutoSize -Wrap
-#>param (
+#>
+
+param (
  [string]$ComputerName = 'localhost',
  [int]$Newest = 5000,
  [int]$maxIDs = 5,
@@ -94,7 +96,8 @@ function parseEventLogMessage()
  catch {
     $fieldName = ""
  }
-  if ($fieldName -ne "" -and $fieldValue -ne "" ) {
+ 
+ if ($fieldName -ne "" -and $fieldValue -ne "" ) {
     $props = @{'fieldName'="$fieldName";
     'fieldValue'=$fieldValue}
  $output_obj = New-Object -TypeName PSObject -Property $props
