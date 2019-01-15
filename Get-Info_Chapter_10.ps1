@@ -355,7 +355,7 @@ Function labc10 {
                 Write-Warning -Message "Ошибка на $c"
                 if ($LogErrors) {
                     Write-Warning -Message "Запись в файл $ErrorLog"
-                    $c | Out-File -FilePath $ErrorLog -Force
+                    $c | Out-File -FilePath $ErrorLog -Append
                 }
             }
 
@@ -374,7 +374,7 @@ Function labc10 {
             catch {
                 $no_errors = $false
                 Write-Warning -Message "Ошибка на $s"
-                $s | Out-File -FilePath $ErrorLog -Force
+                $s | Out-File -FilePath $ErrorLog -Append
                 Write-Error -Message "Компьютер $s недоступен"
             }
             
@@ -384,7 +384,11 @@ Function labc10 {
         }
     }
 
-    END{}
+    END{
+        if($no_errors){
+            Get-ChildItem -Path $ErrorLog | Remove-Item
+        }
+    }
 }
 
 # labc10 -ComputerName localhost, notonline11 -LogErrors -Verbose
@@ -393,7 +397,7 @@ Function labc10 {
 # labc7 -ComputerName localhost | Export-Csv -Path C:\Users\Администратор.WIN-998J9J870LA\Desktop\services.csv
 # 'localhost' | labc10 -Verbose
 
-function Standalone_lab_8 {
+function Standalone_lab_10 {
 <#
 .SYNOPSIS
 Показать основную информацию о компьютере
@@ -407,29 +411,53 @@ function Standalone_lab_8 {
   
     [CmdletBinding()]
     param(
-        [Parameter(ValueFromPipeline=$true)]
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
         [ValidateNotNullOrEmpty()]
-        [string[]]$ComputerName
+        [string[]]$ComputerName,
+
+        [string]$ErrorLog = "$HOME\Desktop\Get_SystemInfo_ErrorLog.txt",
+
+        [switch]$LogErrors
     )
     
     PROCESS {
         foreach ($computer in $computerName) {
-            Write-Verbose "Получаем WMI данные для $computer"
-            $os = Get-WmiObject -class Win32_OperatingSystem -computerName $computer
-            $cs = Get-WmiObject -class Win32_ComputerSystem -computerName $computer
-            $props = @{'ComputerName'=$computer;
-                       'LastBootTime'=($os.ConvertToDateTime($os.LastBootupTime));
-                       'OSVersion'=$os.version;
-                       'Manufacturer'=$cs.manufacturer;
-                       'Model'=$cs.model}
 
-            $obj = New-Object -TypeName PSObject -Property $props
-            Write-Output $obj
+            Write-Verbose "Получаем WMI данные для $computer"
+            try {
+                $no_errors = $true
+                $os = Get-WmiObject -class Win32_OperatingSystem -computerName $computer -ErrorAction Stop
+            }
+            catch {
+                $no_errors = $false
+                Write-Warning -Message "Компьютер $computer не отвечает"
+                if ($LogErrors){
+                    Write-Warning -Message "Запись $computer в лог файл $ErrorLog"
+                    $computer | Out-File $ErrorLog -Append
+                }               
+            }
+            
+            if ($no_errors){
+                $cs = Get-WmiObject -class Win32_ComputerSystem -computerName $computer
+                $props = @{'ComputerName'=$computer;
+                           'LastBootTime'=($os.ConvertToDateTime($os.LastBootupTime));
+                           'OSVersion'=$os.version;
+                           'Manufacturer'=$cs.manufacturer;
+                           'Model'=$cs.model}
+                $obj = New-Object -TypeName PSObject -Property $props
+                Write-Output $obj
+            }
+        }
+    }
+
+    END {
+        if ($no_errors){
+            Get-ChildItem -Path $ErrorLog | Remove-Item
         }
     }
 }
+# Standalone_lab_10 -ComputerName localhost -LogErrors -Verbose
 
-# Standalone_lab_8 -ComputerName localhost
+Standalone_lab_10 -ComputerName localhost, NOTONLINE -LogErrors -Verbose
 # 'localhost','localhost' | Standalone_lab_8 -Verbose
-
 
