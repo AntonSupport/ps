@@ -33,7 +33,7 @@ function Get-SystemInfo {
          [Alias('Hostname')]
          [string[]]$ComputerName,
 
-         [string]$ErrorLog = "$HOME\Desktop\retry.txt",
+         [string]$ErrorLog = "$HOME\Desktop\Get_SystemInfo_ErrorLog.txt",
 
          [switch]$LogErrors
      )
@@ -45,19 +45,36 @@ function Get-SystemInfo {
      PROCESS {
          Write-Verbose "Beginning PROCESS block"
          foreach ($computer in $computername) {
-         Write-Verbose "Querying $computer"
-         $os = Get-WmiObject -class Win32_OperatingSystem -computerName $computer
-         $comp = Get-WmiObject -class Win32_ComputerSystem -computerName $computer
-         $bios = Get-WmiObject -class Win32_BIOS -computerName $computer
-         $props = @{'ComputerName'=$computer;
-                    'OSVersion'=$os.version;
-                    'SPVersion'=$os.servicepackmajorversion;
-                    'BIOSSerial'=$bios.serialnumber;
-                    'Manufacturer'=$comp.manufacturer;
-                    'Model'=$comp.model}
-         Write-Verbose "WMI queries complete"
-         $obj = New-Object -TypeName PSObject -Property $props
-         Write-Output $obj
+            Write-Verbose "Querying $computer"
+            try {
+                $no_errors = $True
+                $os = Get-WmiObject -class Win32_OperatingSystem -computerName $computer -ErrorAction Stop
+
+            }
+            Catch {
+                $no_errors = $false
+                Write-Warning "Поймана ошибка"
+                if ($LogErrors) {
+                    $computer | Out-File $ErrorLog -Append
+                    Write-Warning "Ошибка успешно отправлена в лог файл $errorlog"  
+                }
+                Write-Error "Компьютер отключен"
+            }
+
+            if ($no_errors) {
+                $comp = Get-WmiObject -class Win32_ComputerSystem -computerName $computer
+                $bios = Get-WmiObject -class Win32_BIOS -computerName $computer
+                $props = @{'ComputerName' = $computer;
+                    'OSVersion'           = $os.version;
+                    'SPVersion'           = $os.servicepackmajorversion;
+                    'BIOSSerial'          = $bios.serialnumber;
+                    'Manufacturer'        = $comp.manufacturer;
+                    'Model'               = $comp.model
+                }
+                Write-Verbose "WMI queries complete"
+                $obj = New-Object -TypeName PSObject -Property $props
+                Write-Output $obj
+            }
         }
      }
 
@@ -66,10 +83,11 @@ function Get-SystemInfo {
 
 
 
-<#
-Get-SystemInfo -comp localhost -Verbose
-"localhost", 'localhost' | Get-SystemInfo
 
+
+# "localhost", 'localhost', 'comp1notonline', 'comp2notonline' | Get-SystemInfo -LogErrors -Verbose
+
+<#
 Write-Host "---- PIPELINE MODE ----"
 'localhost','localhost' | Get-SystemInfo -Verbose
 Write-Host "---- PARAM MODE ----"
@@ -92,7 +110,7 @@ Get-SystemInfo
 модель материнской платы...
 
 .EXAMPLE
-laba9 -ComputerName localhost
+laba10 -ComputerName localhost
 
 Вывод:
 
@@ -105,7 +123,7 @@ AdminPass     :
 Model         : GA-770TA-UD3
 SerialNumber  : 00331-10000-00001-AA022
 #>
-Function laba9 {
+Function laba10 {
 
     [cmdletbinding()]
     Param (
@@ -118,7 +136,7 @@ Function laba9 {
     )
 
     BEGIN {
-        Write-Verbose "Начало laba9"}
+        Write-Verbose "Начало laba10"}
     PROCESS {
         foreach ($computer in $ComputerName)
         {
@@ -156,14 +174,14 @@ Function laba9 {
             $obj
         }
     }
-    END {Write-Verbose "Конец laba9"}
+    END {Write-Verbose "Конец laba10"}
 
 }
 
 <#
-laba9 -ComputerName localhost, localhost
-'localhost' | laba9 -Verbose
-laba9
+laba10 -ComputerName localhost, localhost
+'localhost' | laba10 -Verbose
+laba10
 #>
 
 Function construct-labb8 ($d){
