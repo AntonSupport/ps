@@ -132,7 +132,11 @@ Function laba10 {
         [String[]]$ComputerName,
 
         [System.Management.Automation.Runspaces.PSSession]
-        $session = $session
+        $session = $session,
+
+        [String]$ErrorLog = "$HOME\Desktop\Get_SystemInfo_ErrorLog.txt",
+
+        [switch]$LogErrors
     )
 
     BEGIN {
@@ -140,51 +144,84 @@ Function laba10 {
     PROCESS {
         foreach ($computer in $ComputerName)
         {
-            Write-Verbose "Получаем данные для $computer"
-            $os = Get-WmiObject Win32_OperatingSystem -ComputerName $Computer
-            Write-Verbose "Win32_Operatingsystem"
-            $cs = Get-WmiObject Win32_ComputerSystem -ComputerName $Computer
-            Write-Verbose "Win32_Computersystem"
-            $bi = Get-WmiObject Win32_BIOS -ComputerName $Computer
-            Write-Verbose "Win32_BIOS"
-            $prop = @{'Workgroup'= $cs.workgroup;
-                  'Manufacturer' = $cs.manufacturer;
-                  'Computer name' = $cs.psComputerName;
-                  'Version' = $os.Version;
-                  'Model' = $cs.Model;
-                  'AdminPass' = $os.AdminPasswordStatus;
-                  'ServicePackMV' = $os.ServicePackMajorVersion;
-                  'SerialNumber' = $os.SerialNumber}
-            $obj = New-Object -TypeName PSObject -Property $prop
-            $obj
+            try {
+                $no_errors = $true
+                Write-Verbose "Получаем данные для $computer"
+                $os = Get-WmiObject Win32_OperatingSystem -ComputerName $Computer -ErrorAction Stop
+            }
+            catch {
+                $no_errors = $false
+                Write-Warning "Поймана ошибка в Laba10"
+                if ($LogErrors) {
+                    Write-Warning "Компьютер $computer добавлен в лог файл $ErrorLog"
+                    $computer | Out-File $ErrorLog -Append
+                }
+                Write-Error -Message "Компьютер $Computer недоступен"
+            }
+            
+            if ($no_errors) {
+                Write-Verbose "Win32_Operatingsystem"
+                $cs = Get-WmiObject Win32_ComputerSystem -ComputerName $Computer
+                Write-Verbose "Win32_Computersystem"
+                $bi = Get-WmiObject Win32_BIOS -ComputerName $Computer
+                Write-Verbose "Win32_BIOS"
+                $prop = @{'Workgroup'= $cs.workgroup;
+                    'Manufacturer' = $cs.manufacturer;
+                    'Computer name' = $cs.psComputerName;
+                    'Version' = $os.Version;
+                    'Model' = $cs.Model;
+                    'AdminPass' = $os.AdminPasswordStatus;
+                    'ServicePackMV' = $os.ServicePackMajorVersion;
+                    'SerialNumber' = $os.SerialNumber}
+                $obj = New-Object -TypeName PSObject -Property $prop
+                $obj
+            }
         }
         foreach ($s in $session) {
-            $os = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject Win32_OperatingSystem }
-            $cs = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject Win32_ComputerSystem }
-            $bi = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject Win32_BIOS }
-            $prop = @{'Workgroup'= $cs.workgroup;
-                  'Manufacturer' = $cs.manufacturer;
-                  'Computer name' = $cs.psComputerName;
-                  'Version' = $os.Version;
-                  'Model' = $cs.Model;
-                  'AdminPass' = $os.AdminPasswordStatus;
-                  'ServicePackMV' = $os.ServicePackMajorVersion;
-                  'SerialNumber' = $os.SerialNumber}
-            $obj = New-Object -TypeName PSObject -Property $prop
-            $obj
+            try {
+                $no_errors = $true
+                Write-Verbose "Win32_Operatingsystem"
+                $os = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject Win32_OperatingSystem } -ErrorAction Stop
+            }
+            catch {
+                $no_errors = $false
+                Write-Warning -Message "Поймана ошибка для Сессии $s"
+                if ($LogErrors) {
+                    Write-Warning -Message "Запись сессии $s в лог файл $ErrorLog"
+                    $s | Out-File $ErrorLog -Append
+                }
+                Write-Error -Message "Компьютер $s недоступен"
+            }
+            
+            if ($no_errors){
+                Write-Verbose "Win32_Computersystem"
+                $cs = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject Win32_ComputerSystem }
+                Write-Verbose "Win32_BIOS"
+                $bi = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject Win32_BIOS }
+                $prop = @{'Workgroup'= $cs.workgroup;
+                        'Manufacturer' = $cs.manufacturer;
+                        'Computer name' = $cs.psComputerName;
+                        'Version' = $os.Version;
+                        'Model' = $cs.Model;
+                        'AdminPass' = $os.AdminPasswordStatus;
+                        'ServicePackMV' = $os.ServicePackMajorVersion;
+                        'SerialNumber' = $os.SerialNumber}
+                $obj = New-Object -TypeName PSObject -Property $prop
+                $obj
+            }
         }
     }
     END {Write-Verbose "Конец laba10"}
 
 }
+# 'localhost', 'notonline2' | laba10 -LogErrors -Verbose
 
 <#
 laba10 -ComputerName localhost, localhost
-'localhost' | laba10 -Verbose
 laba10
 #>
 
-Function construct-labb8 ($d){
+Function construct-babb10 ($d){
     foreach ($drv in $d){
         Write-Verbose "Получение данных для диска $($drv.Name)"
         $prop = @{'Free Space (GB)' = ($drv.FreeSpace / 1GB).ToString("#.##");
@@ -197,7 +234,7 @@ Function construct-labb8 ($d){
         }
 }
 
-Function labb8 {
+Function babb10 {
 <#
 .SYNOPSIS
 Показывает информацию о дисковом пространстве
@@ -222,20 +259,20 @@ Free Space (GB) Drive Computer Name Size (GB)
     PROCESS{
         foreach ($c in $ComputerName){
             $drive = Get-WmiObject -Class CIM_LogicalDisk -ComputerName $c | where DriveType -eq 3
-            construct-labb8 ($drive)
+            construct-babb10 ($drive)
         }
 
         foreach ($s in $Session ){
             $drive = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject -Class CIM_LogicalDisk }
-            construct-labb8($drive)
+            construct-babb10($drive)
         }
     }
-    END{Write-Verbose "Конец labb8"} 
+    END{Write-Verbose "Конец babb10"} 
 }
 
 <#
-labb8 -ComputerName localhost
-'localhost' | labb8 -Verbose
+babb10 -ComputerName localhost
+'localhost' | babb10 -Verbose
 #>
 
 Function construct-labc8 ($serv) {
