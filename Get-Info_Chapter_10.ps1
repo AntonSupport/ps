@@ -275,7 +275,7 @@ Free Space (GB) Drive Computer Name Size (GB)
                 }
                 
             }
-            if($no_errors) { construct-labb10 ($drive) }
+            if($no_errors) { construct-labb10 ( $($drive | Where-Object DriveType -eq 3) )}
         }
 
         foreach ($s in $Session ){
@@ -292,7 +292,7 @@ Free Space (GB) Drive Computer Name Size (GB)
                 }
             }
             
-            if($no_errors) { construct-labb10($drive) }
+            if($no_errors) { construct-labb10( $($drive | Where-Object DriveType -eq 3) )}
         }
     }
     END{Write-Verbose "Конец labb10"} 
@@ -348,8 +348,7 @@ Function labc10 {
             try {
                 Write-Verbose "Получаем информацию о сервисах компьютера $c"
                 $no_errors = $true
-                $service = Get-WmiObject -Class Win32_Service -ComputerName $c | Where-Object State -eq "Running" -ErrorAction Stop -ErrorVariable $err
-                if ($err) { Write-Error $err }
+                $service = Get-WmiObject -Class Win32_Service -ComputerName $c -ErrorAction Stop
             }
             catch {
                 $no_errors = $false
@@ -361,7 +360,7 @@ Function labc10 {
             }
 
             if ($no_errors) {
-                construct-labc10 ($service)
+                construct-labc10 ($($service | Where-Object State -eq "Running"))
             }   
         }
 
@@ -370,7 +369,7 @@ Function labc10 {
             try {
                 Write-Verbose "Получаем информацию о сервисах компьютера $c"
                 $no_errors = $true
-                $service = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject -Class Win32_Service | Where-Object State -eq "Running" }
+                $service = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject -Class Win32_Service } -ErrorAction Stop
             }
             catch {
                 $no_errors = $false
@@ -380,7 +379,7 @@ Function labc10 {
             }
             
             if ($no_errors) {
-                construct-labc10 ($service)
+                construct-labc10 ($($service | Where-Object State -eq "Running"))
             }            
         }
     }
@@ -388,7 +387,7 @@ Function labc10 {
     END{}
 }
 
-labc10 -ComputerName notonline11 -LogErrors -Verbose | Select-Object -First 1
+# labc10 -ComputerName localhost, notonline11 -LogErrors -Verbose
 
 # labc10 -ComputerName localhost | select computername, servicename, processname, processdescription
 # labc7 -ComputerName localhost | Export-Csv -Path C:\Users\Администратор.WIN-998J9J870LA\Desktop\services.csv
