@@ -221,7 +221,7 @@ laba10 -ComputerName localhost, localhost
 laba10
 #>
 
-Function construct-babb10 ($d){
+Function construct-labb10 ($d){
     foreach ($drv in $d){
         Write-Verbose "Получение данных для диска $($drv.Name)"
         $prop = @{'Free Space (GB)' = ($drv.FreeSpace / 1GB).ToString("#.##");
@@ -234,7 +234,7 @@ Function construct-babb10 ($d){
         }
 }
 
-Function babb10 {
+Function labb10 {
 <#
 .SYNOPSIS
 Показывает информацию о дисковом пространстве
@@ -252,30 +252,60 @@ Free Space (GB) Drive Computer Name Size (GB)
         [Parameter(ValueFromPipeline=$true)]
         [ValidateNotNullOrEmpty()]
         [String[]]$ComputerName,
+
+        [switch]$LogErrors,
+
+        [String]$ErrorLog = "$HOME\Desktop\Get_SystemInfo_ErrorLog.txt",
+        
         $Session = $Session
     )
 
-    BEGIN{}
     PROCESS{
         foreach ($c in $ComputerName){
-            $drive = Get-WmiObject -Class CIM_LogicalDisk -ComputerName $c | where DriveType -eq 3
-            construct-babb10 ($drive)
+            try {
+                $no_errors = $true
+                $drive = Get-WmiObject -Class CIM_LogicalDisk -ComputerName $c -ErrorAction Stop
+            }
+            catch {
+                $no_errors = $false
+                Write-Warning "Ошибка на $c"
+                if ($LogErrors) {
+                    Write-Warning -Message "Запись компьютера $c в лог файл $ErrorLog"
+                    $c | Out-File $ErrorLog -Append
+                }
+                
+            }
+            if($no_errors) { construct-labb10 ($drive) }
         }
 
         foreach ($s in $Session ){
-            $drive = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject -Class CIM_LogicalDisk }
-            construct-babb10($drive)
+            try {
+                $no_errors = $true
+                $drive = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject -Class CIM_LogicalDisk } -ErrorAction Stop
+            }
+            catch {
+                $no_errors = $false
+                Write-Warning -Message "Ошибка на $s"
+                if ($LogErrors) {
+                    Write-Warning -Message "Запись компьютера $c в лог файл $ErrorLog"
+                    $s | Out-File -FilePath $ErrorLog -Append
+                }
+            }
+            
+            if($no_errors) { construct-labb10($drive) }
         }
     }
-    END{Write-Verbose "Конец babb10"} 
+    END{Write-Verbose "Конец labb10"} 
 }
 
+# labb10 -ComputerName localhost, notonlinebb10 -LogErrors -Verbose
+
 <#
-babb10 -ComputerName localhost
-'localhost' | babb10 -Verbose
+labb10 -ComputerName localhost
+'localhost' | labb10 -Verbose
 #>
 
-Function construct-labc8 ($serv) {
+Function construct-labc10 ($serv) {
     foreach ( $s in $serv ) {
         Write-Verbose "Получаем информацию для сервиса $($s.Name)"
         $id = $s | Select-Object -ExpandProperty ProcessId
@@ -295,7 +325,7 @@ Function construct-labc8 ($serv) {
      }
 }
 
-Function labc8 {
+Function labc10 {
 
     [cmdletbinding()]
     Param (
@@ -303,31 +333,66 @@ Function labc8 {
         [ValidateNotNullOrEmpty()]
         [String[]]$ComputerName,
 
+        [string]$ErrorLog = "$HOME\Desktop\Get_SystemInfo_ErrorLog.txt",
+
+        [switch]$LogErrors,
+
         $session = $session
     )
 
-    BEGIN{Write-Verbose "Начало labc8"}
+    BEGIN{Write-Verbose "Начало labc10"}
     
     PROCESS {
         foreach ( $c in $ComputerName ) {
-            Write-Verbose "Получаем информацию о сервисах компьютера $c"
-            $service = Get-WmiObject -Class Win32_Service -ComputerName $c | where State -eq "Running"
-            construct-labc8 ($service)
+            
+            try {
+                Write-Verbose "Получаем информацию о сервисах компьютера $c"
+                $no_errors = $true
+                $service = Get-WmiObject -Class Win32_Service -ComputerName $c | Where-Object State -eq "Running" -ErrorAction Stop -ErrorVariable $err
+                if ($err) { Write-Error $err }
+            }
+            catch {
+                $no_errors = $false
+                Write-Warning -Message "Ошибка на $c"
+                if ($LogErrors) {
+                    Write-Warning -Message "Запись в файл $ErrorLog"
+                    $c | Out-File -FilePath $ErrorLog -Force
+                }
+            }
+
+            if ($no_errors) {
+                construct-labc10 ($service)
+            }   
         }
 
         foreach ($s in $session) {
-            Write-Verbose "Получаем информацию о сервисах компьютера $c"
-            $service = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject -Class Win32_Service | where State -eq "Running" }
-            construct-labc8 ($service)
+        
+            try {
+                Write-Verbose "Получаем информацию о сервисах компьютера $c"
+                $no_errors = $true
+                $service = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject -Class Win32_Service | Where-Object State -eq "Running" }
+            }
+            catch {
+                $no_errors = $false
+                Write-Warning -Message "Ошибка на $s"
+                $s | Out-File -FilePath $ErrorLog -Force
+                Write-Error -Message "Компьютер $s недоступен"
+            }
+            
+            if ($no_errors) {
+                construct-labc10 ($service)
+            }            
         }
     }
 
     END{}
 }
 
-# labc8 -ComputerName localhost | select computername, servicename, processname, processdescription
+labc10 -ComputerName notonline11 -LogErrors -Verbose | Select-Object -First 1
+
+# labc10 -ComputerName localhost | select computername, servicename, processname, processdescription
 # labc7 -ComputerName localhost | Export-Csv -Path C:\Users\Администратор.WIN-998J9J870LA\Desktop\services.csv
-# 'localhost' | labc8 -Verbose
+# 'localhost' | labc10 -Verbose
 
 function Standalone_lab_8 {
 <#
