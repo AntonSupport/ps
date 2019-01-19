@@ -1,5 +1,6 @@
 ﻿# Coздать функцию Set-Password, которая будет изменять пароль
-# Создать функцию New-Password, которая будет создавать новую запись в файле
+# Создать функцию New-Password, Add-Password которая будет создавать новую запись в файле
+
 
 $kdFile = "$HOME\Documents\kd_list2.csv"
 
@@ -68,7 +69,7 @@ Get-Password yandex.ru -Name, Login, Email, Website
 }
 
 Function New-Password {
-<#
+    <#
 .SYNOPSIS
 Генератор паролей
 
@@ -108,15 +109,15 @@ New-Password -Copy
 
 
     [char[]]$lowletters = "qwertyuiopasdfghjklzxcvbnm"
-    [char[]]$upletters  = "QWERTYUIOPASDFGHJKLZXCVBNM"
-    [char[]]$ints       = "1234567890"
-    [char[]]$specSmbls  = '!@#$%^*()_+=-<>'
+    [char[]]$upletters = "QWERTYUIOPASDFGHJKLZXCVBNM"
+    [char[]]$ints = "1234567890"
+    [char[]]$specSmbls = '!@#$%^*()_+=-<>'
 
-    [char[]]$pass   = Get-Random -InputObject $lowletters -Count $(Get-Random -Minimum 4 -Maximum 6)
-            $pass  += Get-Random -InputObject $upletters -Count $(Get-Random -Minimum 2 -Maximum 4)
-            $pass  += Get-Random -InputObject $ints -Count $(Get-Random -Minimum 2 -Maximum 4)
-    if(!$NoSymbols) { $pass  += Get-Random -InputObject $specSmbls -Count $(Get-Random -Minimum 1 -Maximum 2) }
-            $pass   = $pass | sort {Get-Random}
+    [char[]]$pass = Get-Random -InputObject $lowletters -Count $(Get-Random -Minimum 4 -Maximum 6)
+    $pass += Get-Random -InputObject $upletters -Count $(Get-Random -Minimum 2 -Maximum 4)
+    $pass += Get-Random -InputObject $ints -Count $(Get-Random -Minimum 2 -Maximum 4)
+    if (!$NoSymbols) { $pass += Get-Random -InputObject $specSmbls -Count $(Get-Random -Minimum 1 -Maximum 2) }
+    $pass = $pass | sort {Get-Random}
     
     [String]$pass = $pass
     $pass = $pass.Replace(' ', '')
@@ -128,3 +129,4 @@ New-Password -Copy
 
     $pass
 }
+
