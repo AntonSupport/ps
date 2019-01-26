@@ -4,7 +4,8 @@ Function Export-EventLogSource {
 
     [cmdletbinding()]
     Param (
-        [Parameter(Position=0,Mandatory=$True,
+        [Parameter(Position=0,
+                   Mandatory=$True,
                    Helpmessage="Enter acomputername",
                    ValueFromPipeline=$True)]
         [string]$Computername,
@@ -34,12 +35,12 @@ Function Export-EventLogSource {
     Process {
         Write-Verbose "Getting newest $newest $log event log entries from $computername"
         Try {
-            Write-Host $computername.ToUpper -ForegroundColor Green
-            $logs=Get-EventLog -LogName $log -Newest $Newest -Computer $Computer - ErrorAction Stop
+            Write-Host $computername.ToUpper() -ForegroundColor "Green"
+            $logs=Get-EventLog -LogName $log -Newest $Newest -Computer $Computername -ErrorAction Stop
             if ($logs) {
                 Write-Verbose "Sorting $($logs.count) entries"
-                $log | sort Source | foreach {
-                $logfile=Join-Path -Path $logpath -ChildPath "$computername- $($_.Source).txt"
+                $logs | Sort-Object Source | ForEach-Object {
+                $logfile=Join-Path -Path $logpath -ChildPath "$computername-$($_.Source).txt"
                 $_ | Format-List TimeWritten,MachineName,EventID,EntryType,Message |
                 Out-File -FilePath $logfile -append
                 }
@@ -56,7 +57,9 @@ Function Export-EventLogSource {
     }
 
     End {
-        dir $logpath
+        Get-ChildItem $logpath
         Write-Verbose "Finished export event source function"
     }
-    }
+}
+
+Export-EventLogSource -Computername A1 -Log System -Verbose
