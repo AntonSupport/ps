@@ -72,7 +72,7 @@ Function laba10 {
                     'Model' = $cs.Model;
                     'AdminPass' = $os.AdminPasswordStatus;
                     'ServicePackMV' = $os.ServicePackMajorVersion;
-                    'SerialNumber' = $os.SerialNumber}
+                    'SerialNumber' = $bi.SerialNumber}
                 $obj = New-Object -TypeName PSObject -Property $prop
                 $obj
             }
