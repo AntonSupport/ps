@@ -2,47 +2,48 @@
 <Configuration>
     <ViewDefinitions>
         <View>
-            <Name>MOL.SystemInfo</Name>
+            <Name>MOL.ComputerSystemInfo</Name>
             <ViewSelectedBy>
-                <TypeName>MOL.SystemInfo</TypeName>
+                <TypeName>MOL.ComputerSystemInfo</TypeName>
             </ViewSelectedBy>
-            <TableControl>
-                <TableHeaders>
-                    <TableColumnHeader/>
-                    <TableColumnHeader>
-                        <Label>Mfgr</Label>
-                        <Width>20</Width>
-                    </TableColumnHeader>
-                    <TableColumnHeader>
-                        <Width>20</Width>
-                    </TableColumnHeader>
-                    <TableColumnHeader/>
-                    <TableColumnHeader>
-                        <Label>SP</Label>
-                    </TableColumnHeader>
-                </TableHeaders>
-                <TableRowEntries>
-                    <TableRowEntry>
-                        <TableColumnItems>
-                            <TableColumnItem>
+            <ListControl>
+                <ListEntries>
+                    <ListEntry>
+                        <ListItems>
+                            <ListItem>
+                                <Label>Computername</Label>
                                 <PropertyName>ComputerName</PropertyName>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <PropertyName>Manufacturer</PropertyName>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <PropertyName>Model</PropertyName>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <Propertyname>OSVersion</Propertyname>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <Propertyname>SPVersion</Propertyname>
-                            </TableColumnItem>
-                        </TableColumnItems>
-                    </TableRowEntry>
-                </TableRowEntries>
-            </TableControl>
+                            </ListItem>
+                            <ListItem>
+                                <Label>Workgroup</Label>
+                                <PropertyName>Workgroup</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Label>AdminPassword</Label>
+                                <PropertyName>AdminPass</PropertyName>
+                            </ListItem>
+                            <ListItem>
+                                <Propertyname>Model</Propertyname>
+                            </ListItem>
+                            <ListItem>
+                                <Propertyname>Manufacturer</Propertyname>
+                            </ListItem>
+                            <ListItem>
+                                <Label>BIOSSerialNumber</Label>
+                                <Propertyname>SerialNumber</Propertyname>
+                            </ListItem>
+                            <ListItem>
+                                <Label>OSVersion</Label>
+                                <Propertyname>Version</Propertyname>
+                            </ListItem>
+                            <ListItem>
+                                <Label>SPVersion</Label>
+                                <Propertyname>ServicePackMV</Propertyname>
+                            </ListItem>
+                        </ListItems>
+                    </ListEntry>
+                </ListEntries>
+            </ListControl>
         </View>
     </ViewDefinitions>
 </Configuration>

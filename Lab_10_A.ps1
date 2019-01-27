@@ -51,7 +51,7 @@ Function laba10 {
             }
             catch {
                 $no_errors = $false
-                Write-Warning "Поймана ошибка в Laba10"
+                Write-Warning "Поймана ошибка в laba10"
                 if ($LogErrors) {
                     Write-Warning "Компьютер $computer добавлен в лог файл $ErrorLog"
                     $computer | Out-File $ErrorLog -Append

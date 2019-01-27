@@ -10,7 +10,7 @@
 модель материнской платы...
 
 .EXAMPLE
-laba10 -ComputerName localhost
+laba12 -ComputerName localhost
 
 Вывод:
 
@@ -23,7 +23,7 @@ AdminPass     :
 Model         : GA-770TA-UD3
 SerialNumber  : 00331-10000-00001-AA022
 #>
-Function laba10 {
+Function laba12 {
 
     [cmdletbinding()]
     Param (
@@ -40,18 +40,17 @@ Function laba10 {
     )
 
     BEGIN {
-        Write-Verbose "Начало laba10"}
+        Write-Verbose "Начало laba12"}
     PROCESS {
         foreach ($computer in $ComputerName)
         {
             try {
                 $no_errors = $true
-                Write-Verbose "Получаем данные для $computer"
                 $os = Get-WmiObject Win32_OperatingSystem -ComputerName $Computer -ErrorAction Stop
             }
             catch {
                 $no_errors = $false
-                Write-Warning "Поймана ошибка в Laba10"
+                Write-Warning "Поймана ошибка в laba12"
                 if ($LogErrors) {
                     Write-Warning "Компьютер $computer добавлен в лог файл $ErrorLog"
                     $computer | Out-File $ErrorLog -Append
@@ -67,13 +66,14 @@ Function laba10 {
                 Write-Verbose "Win32_BIOS"
                 $prop = @{'Workgroup'= $cs.workgroup;
                     'Manufacturer' = $cs.manufacturer;
-                    'Computer name' = $cs.psComputerName;
+                    'Computername' = $cs.psComputerName;
                     'Version' = $os.Version;
                     'Model' = $cs.Model;
                     'AdminPass' = $os.AdminPasswordStatus;
                     'ServicePackMV' = $os.ServicePackMajorVersion;
-                    'SerialNumber' = $os.SerialNumber}
+                    'SerialNumber' = $bi.SerialNumber}
                 $obj = New-Object -TypeName PSObject -Property $prop
+                $obj.PSObject.TypeNames.Insert(0, "MOL.ComputerSystemInfo")
                 $obj
             }
         }
@@ -100,25 +100,26 @@ Function laba10 {
                 $bi = Invoke-Command -Session $s -ScriptBlock { Get-WmiObject Win32_BIOS }
                 $prop = @{'Workgroup'= $cs.workgroup;
                         'Manufacturer' = $cs.manufacturer;
-                        'Computer name' = $cs.psComputerName;
+                        'Computername' = $cs.psComputerName;
                         'Version' = $os.Version;
                         'Model' = $cs.Model;
                         'AdminPass' = $os.AdminPasswordStatus;
                         'ServicePackMV' = $os.ServicePackMajorVersion;
-                        'SerialNumber' = $os.SerialNumber}
+                        'SerialNumber' = $bi.SerialNumber}
                 $obj = New-Object -TypeName PSObject -Property $prop
                 $obj.PSObject.TypeNames.Insert(0, "MOL.ComputerSystemInfo")
                 $obj
             }
         }
     }
-    END {Write-Verbose "Конец laba10"}
+    END {Write-Verbose "Конец laba12"}
 
 }
 
-'localhost', 'notonline2' | laba10 -LogErrors -Verbose
+Update-FormatData –prepend ./CustomViewA.format.ps1xml
+'localhost' | laba12 -LogErrors -Verbose
 
 <#
-laba10 -ComputerName localhost, localhost
-laba10
+laba12 -ComputerName localhost, localhost
+laba12
 #>
