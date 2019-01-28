@@ -2,49 +2,6 @@
 <Configuration>
     <ViewDefinitions>
         <View>
-            <Name>MOL.SystemInfo</Name>
-            <ViewSelectedBy>
-                <TypeName>MOL.SystemInfo</TypeName>
-            </ViewSelectedBy>
-            <TableControl>
-                <TableHeaders>
-                    <TableColumnHeader/>
-                    <TableColumnHeader>
-                        <Label>Mfgr</Label>
-                        <Width>20</Width>
-                    </TableColumnHeader>
-                    <TableColumnHeader>
-                        <Width>20</Width>
-                    </TableColumnHeader>
-                    <TableColumnHeader/>
-                    <TableColumnHeader>
-                        <Label>SP</Label>
-                    </TableColumnHeader>
-                </TableHeaders>
-                <TableRowEntries>
-                    <TableRowEntry>
-                        <TableColumnItems>
-                            <TableColumnItem>
-                                <PropertyName>ComputerName</PropertyName>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <PropertyName>Manufacturer</PropertyName>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <PropertyName>Model</PropertyName>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <Propertyname>OSVersion</Propertyname>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <Propertyname>SPVersion</Propertyname>
-                            </TableColumnItem>
-                        </TableColumnItems>
-                    </TableRowEntry>
-                </TableRowEntries>
-            </TableControl>
-        </View>
-        <View>
             <Name>MOL.ComputerSystemInfo</Name>
             <ViewSelectedBy>
                 <TypeName>MOL.ComputerSystemInfo</TypeName>

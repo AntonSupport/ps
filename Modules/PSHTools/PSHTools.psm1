@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 выводит основную информацию о компьютере
 
@@ -8,7 +8,7 @@
 модель материнской платы...
 
 .EXAMPLE
-laba12 -ComputerName localhost
+Get-MOLComputerInfo -ComputerName localhost
 
 Вывод:
 
@@ -21,7 +21,7 @@ AdminPass     :
 Model         : GA-770TA-UD3
 SerialNumber  : 00331-10000-00001-AA022
 #>
-Function laba12 {
+Function Get-MOLComputerInfo {
 
     [cmdletbinding()]
     Param (
@@ -38,7 +38,7 @@ Function laba12 {
     )
 
     BEGIN {
-        Write-Verbose "Начало laba12"}
+        Write-Verbose "Начало Get-MOLComputerInfo"}
     PROCESS {
         foreach ($computer in $ComputerName)
         {
@@ -48,7 +48,7 @@ Function laba12 {
             }
             catch {
                 $no_errors = $false
-                Write-Warning "Поймана ошибка в laba12"
+                Write-Warning "Поймана ошибка в Get-MOLComputerInfo"
                 if ($LogErrors) {
                     Write-Warning "Компьютер $computer добавлен в лог файл $ErrorLog"
                     $computer | Out-File $ErrorLog -Append
@@ -110,13 +110,13 @@ Function laba12 {
             }
         }
     }
-    END {Write-Verbose "Конец laba12"}
+    END {Write-Verbose "Конец Get-MOLComputerInfo"}
 
 }
 
 # ----------------------------------- B -----------------------------
 
-Function construct-labb12 ($d) {
+Function construct-Get-MOLDiskInfo ($d) {
     foreach ($drv in $d) {
         Write-Verbose "Получение данных для диска $($drv.Name)"
         $prop = @{'FreeSpace' = ($drv.FreeSpace / 1GB).ToString("#.##");
@@ -131,7 +131,7 @@ Function construct-labb12 ($d) {
     }
 }
 
-Function labb12 {
+Function Get-MOLDiskInfo {
     <#
 .SYNOPSIS
 Показывает информацию о дисковом пространстве
@@ -172,7 +172,7 @@ Free Space (GB) Drive Computer Name Size (GB)
                 }
                 
             }
-            if ($no_errors) { construct-labb12 ( $($drive | Where-Object DriveType -eq 3) )}
+            if ($no_errors) { construct-Get-MOLDiskInfo ( $($drive | Where-Object DriveType -eq 3) )}
         }
 
         foreach ($s in $Session ) {
@@ -189,15 +189,15 @@ Free Space (GB) Drive Computer Name Size (GB)
                 }
             }
             
-            if ($no_errors) { construct-labb12( $($drive | Where-Object DriveType -eq 3) )}
+            if ($no_errors) { construct-Get-MOLDiskInfo( $($drive | Where-Object DriveType -eq 3) )}
         }
     }
-    END {Write-Verbose "Конец labb12"}
+    END {Write-Verbose "Конец Get-MOLDiskInfo"}
 }
 
 # ------------------------------- C -------------------------------
 
-Function construct-labc12 ($serv) {
+Function construct-Get-MOLServiceInfo ($serv) {
     foreach ( $s in $serv ) {
         Write-Verbose "Получаем информацию для сервиса $($s.Name)"
         $id = $s | Select-Object -ExpandProperty ProcessId
@@ -218,7 +218,7 @@ Function construct-labc12 ($serv) {
      }
 }
 
-Function labc12 {
+Function Get-MOLServiceInfo {
 
     [cmdletbinding()]
     Param (
@@ -233,7 +233,7 @@ Function labc12 {
         $session = $session
     )
 
-    BEGIN{Write-Verbose "Начало labc12"}
+    BEGIN{Write-Verbose "Начало Get-MOLServiceInfo"}
     
     PROCESS {
         foreach ( $c in $ComputerName ) {
@@ -253,7 +253,7 @@ Function labc12 {
             }
 
             if ($no_errors) {
-                construct-labc12 ($($service | Where-Object State -eq "Running"))
+                construct-Get-MOLServiceInfo ($($service | Where-Object State -eq "Running"))
             }   
         }
 
@@ -272,7 +272,7 @@ Function labc12 {
             }
             
             if ($no_errors) {
-                construct-labc12 ($($service | Where-Object State -eq "Running"))
+                construct-Get-MOLServiceInfo ($($service | Where-Object State -eq "Running"))
             }            
         }
     }
@@ -283,3 +283,7 @@ Function labc12 {
         }
     }
 }
+
+Export-ModuleMember -Function Get-MOLComputerInfo
+Export-ModuleMember -Function Get-MOLDiskInfo
+Export-ModuleMember -Function Get-MOLServiceInfo
