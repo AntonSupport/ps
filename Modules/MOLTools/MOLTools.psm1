@@ -28,26 +28,26 @@ Model        : GA-770TA-UD3
 function Get-MOLSystemInfo {
 
     [CmdletBinding()]
-     param(
-         [Parameter(Mandatory = $True,
-                    ValueFromPipeline = $true,
-                    HelpMessage = "Computer name or IP address")]
-         [ValidateCount(1,10)] # Ограничить прием данных от одного до десяти объектов
-         [Alias('Hostname')]
-         [string[]]$ComputerName,
+    param(
+        [Parameter(Mandatory = $True,
+            ValueFromPipeline = $true,
+            HelpMessage = "Computer name or IP address")]
+        [ValidateCount(1, 10)] # Ограничить прием данных от одного до десяти объектов
+        [Alias('Hostname')]
+        [string[]]$ComputerName,
 
-         [string]$ErrorLog = $MOLErrorLogPreference,
+        [string]$ErrorLog = $MOLErrorLogPreference,
 
-         [switch]$LogErrors
-     )
+        [switch]$LogErrors
+    )
 
-     BEGIN {
+    BEGIN {
         Write-Verbose "Error log will be $ErrorLog"
-     }
+    }
 
-     PROCESS {
-         Write-Verbose "Beginning PROCESS block"
-         foreach ($computer in $computername) {
+    PROCESS {
+        Write-Verbose "Beginning PROCESS block"
+        foreach ($computer in $computername) {
             Write-Verbose "Querying $computer"
             try {
                 $no_errors = $True
@@ -76,14 +76,32 @@ function Get-MOLSystemInfo {
                 }
                 Write-Verbose "WMI queries complete"
                 $obj = New-Object -TypeName PSObject -Property $props
-                $obj.PSObject.TypeNames.Insert(0,'MOL.SystemInfo')
+                $obj.PSObject.TypeNames.Insert(0, 'MOL.SystemInfo')
                 Write-Output $obj
             }
         }
-     }
+    }
 
-     END {}
+    END {}
+}
+
+function Restart-MOLCimComputer {
+    [CmdletBinding(SupportsShouldProcess = $true,
+        ConfirmImpact = 'High')]
+    param (
+        [Parameter(Mandatory = $true,
+            ValueFromPipeline = $true)]
+        [string[]]$ComputerName
+    )
+
+    process {
+        foreach ( $Computer in $ComputerName ) {
+            Invoke-CimMethod -ClassName Win32_OperatingSystem -MethodName Reboot -ComputerName $Computer
+        }
+    }
+    
 }
 
 Export-ModuleMember -Variable MOLErrorLogPreference
-Export-ModuleMember -Function Get-MOLSystemInfo
+Export-ModuleMember -Function Get-MOLSystemInfo,
+                              Restart-MOLCimComputer
