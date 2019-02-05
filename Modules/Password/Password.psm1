@@ -50,22 +50,25 @@ Get-Password yandex.ru -Name, Login, Email, Website
         [Switch]$Name,
         [Switch]$Login,
         [Switch]$Email,
-        [Switch]$Website
+        [Switch]$Website,
+        [Switch]$Id
     )
 
     $doc = Import-Csv -Path $kdFile -Encoding UTF8
 
-    if (!$Name -and !$Login -and !$Email -and !$Website){
+    if (!$Name -and !$Login -and !$Email -and !$Website -and !$Id){
         $doc.Where( { $_.Name -Like "*$Search*" -or
                       $_.Login -Like "*$Search*" -or 
                       $_.Email -Like "*$Search*" -or
-                      $_.Website -Like "*$Search*" })
+                      $_.Website -Like "*$Search*" -or
+                      $_.id -eq $search })
     }
 
     if ($Name) { $doc.Where({$_.Name -like "*$Search*"}) }
     if ($Login) { $doc.Where({$_.Login -like "*$Search*"}) }
     if ($Email) { $doc.Where({$_.Email -like "*$Search*"}) }
-    if ($Website) { $doc.Where({$_.Website -like "*$Search*"}) }
+    if ($Website) { $doc.Where( {$_.Website -like "*$Search*"}) }
+    if ($id) { $doc.Where( {$_.id -eq $search })}
 }
 
 Function New-Password {
@@ -128,5 +131,56 @@ New-Password -Copy
     }
 
     $pass
+}
+
+Function Add-Password {
+    <#
+    .SYNOPSIS
+    Добавляет новый пароль в ключевой документ
+    .DESCRIPTION
+    Добавляет новый пароль уже с основными предустановками как email, дата и пароль...
+    .EXAMPLE
+    Add-Password -name ИмяСайта -login 'somelink@narod.ru'
+    Для быстрого добавления пароля.
+    .EXAMPLE
+    Add-Password -name ИмяСайта -login Anton -Website someSite.com -question 'Любимая живность' -answer ЮЮ -info 'Дополнительная информация'
+    Для добавления полной инфы
+    .EXAMPLE
+    Show-Command Add-Password
+    #>
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$name,
+
+        [parameter(Mandatory = $true)]
+        [string]$login,
+
+        $modifiedDate = '',
+
+        [String]$Website = '',
+
+        [String]$question = '',
+
+        [String]$answer = '',
+
+        [String]$info = ''
+    )
+
+    $doc = Import-Csv -Path $kdFile -Encoding UTF8
+    [Int]$newID = [int](($doc | Select-Object id -Last 1).id) + 1
+
+    # Date
+    $newDate = (Get-Date).ToShortDateString()
+    # Whose
+    [String]$whose = 'My'
+    # Pass
+    [String]$pass = New-Password
+    # Email
+    [String]$email = 'qwsx@mail.ru'
+   
+    $np = "`"$newID`",`"$newDate`",`"$modifiedDate`",`"$whose`",`"$name`",`"$Website`",`"$login`",`"$pass`",`"$email`",`"$question`",`"$answer`",`"$info`""
+    $np | out-file -FilePath $kdFile -Encoding utf8 -Append
+    
 }
 
