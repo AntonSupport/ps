@@ -1,6 +1,4 @@
 ﻿# Coздать функцию Set-Password, которая будет изменять пароль
-# Создать функцию New-Password, Add-Password которая будет создавать новую запись в файле
-
 
 $kdFile = "$HOME\Documents\kd_list2.csv"
 
@@ -156,6 +154,8 @@ Function Add-Password {
         [parameter(Mandatory = $true)]
         [string]$login,
 
+        [string]$email,
+
         $modifiedDate = '',
 
         [String]$Website = '',
@@ -177,10 +177,11 @@ Function Add-Password {
     # Pass
     [String]$pass = New-Password
     # Email
-    [String]$email = 'qwsx@mail.ru'
+    if (!$email) { $email = 'qwsx@mail.ru' }
    
-    $np = "`"$newID`",`"$newDate`",`"$modifiedDate`",`"$whose`",`"$name`",`"$Website`",`"$login`",`"$pass`",`"$email`",`"$question`",`"$answer`",`"$info`""
-    $np | out-file -FilePath $kdFile -Encoding utf8 -Append
+    # $np = "`"$newID`",`"$newDate`",`"$modifiedDate`",`"$whose`",`"$name`",`"$Website`",`"$login`",`"$pass`",`"$email`",`"$question`",`"$answer`",`"$info`""
+    $np = "$newID,$newDate,$modifiedDate,$whose,$name,$Website,$login,$pass,$email,$question,$answer,$info"
+    $np | out-file -FilePath $kdFile -Encoding utf8 -Append -Force
     
 }
 
