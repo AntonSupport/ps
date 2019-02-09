@@ -66,7 +66,7 @@ Get-Password yandex.ru -Name, Login, Email, Website
     if ($Login) { $doc.Where({$_.Login -like "*$Search*"}) }
     if ($Email) { $doc.Where({$_.Email -like "*$Search*"}) }
     if ($Website) { $doc.Where( {$_.Website -like "*$Search*"}) }
-    if ($id) { $doc.Where( {$_.id -eq $search })}
+    if ($Id) { $doc.Where( {$_.id -eq $search }) }
 }
 
 Function New-Password {
