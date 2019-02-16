@@ -54,7 +54,7 @@ Get-Password yandex.ru -Name, Login, Email, Website
 
     $doc = Import-Csv -Path $kdFile -Encoding UTF8
 
-    if (!$Name -and !$Login -and !$Email -and !$Website -and !$Id){
+    if ($true -notin $Name, $Login, $Email, $Website, $Id) {
         $doc.Where( { $_.Name -Like "*$Search*" -or
                       $_.Login -Like "*$Search*" -or 
                       $_.Email -Like "*$Search*" -or
