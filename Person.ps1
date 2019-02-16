@@ -38,3 +38,4 @@ $loginSet = @(Get-Password * | select login -Unique | where login -Like "*@*")
 [array]$p = $emailSet
 $p += $loginSet
 $p
+
